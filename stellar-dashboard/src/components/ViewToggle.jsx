@@ -3,6 +3,7 @@ export default function ViewToggle({ view, setView }) {
     { key: "individual", label: "INDIVIDUAL" },
     { key: "combined", label: "COMBINED" },
     { key: "allplanets", label: "ALL PLANETS" },
+    { key: "raceanalysis", label: "RACE ANALYSIS" },
   ];
 
   return (
@@ -10,7 +11,7 @@ export default function ViewToggle({ view, setView }) {
       style={{
         display: "flex",
         gap: 4,
-        padding: "0 32px",
+        padding: "16px 32px 0",
         marginBottom: 16,
       }}
     >

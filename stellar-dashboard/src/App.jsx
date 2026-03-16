@@ -6,6 +6,7 @@ import ViewToggle from "./components/ViewToggle";
 import IndividualView from "./components/IndividualView/IndividualView";
 import CombinedView from "./components/CombinedView/CombinedView";
 import AllPlanetsView from "./components/AllPlanetsView/AllPlanetsView";
+import RaceAnalysisView from "./components/RaceAnalysisView/RaceAnalysisView";
 import ChartSkeleton from "./components/ui/ChartSkeleton";
 import ErrorBanner from "./components/ui/ErrorBanner";
 
@@ -16,6 +17,19 @@ export default function App() {
   const [view, setView] = useState("individual"); // "individual" | "combined"
   const [hoveredPoint, setHoveredPoint] = useState(null); // { data, x, y } | null
   const [selectedRace, setSelectedRace] = useState(null); // PlanetaryState | null — clicked dot
+
+  // ── Race Analysis persistent state (survives tab switches) ──
+  const [raCardIdInput, setRaCardIdInput] = useState("Taree-2026-03-10");
+  const [raRaceNumberInput, setRaRaceNumberInput] = useState("1");
+  const [raNumbersInput, setRaNumbersInput] = useState("");
+  const [raActualResultsInput, setRaActualResultsInput] = useState("");
+  const [raRows, setRaRows] = useState(null);
+  const [raPredRows, setRaPredRows] = useState(null);
+  const [raActualRows, setRaActualRows] = useState(null);
+  const [raRawPlanetStates, setRaRawPlanetStates] = useState(null);
+  const [raLoading, setRaLoading] = useState(false);
+  const [raError, setRaError] = useState(null);
+  const [raSubmittedMeta, setRaSubmittedMeta] = useState(null);
 
   const { allData, loading, error, submittedCardId, fetchAll } =
     usePlanetaryData();
@@ -45,30 +59,48 @@ export default function App() {
         loading={loading}
       />
 
+      {/* View Toggle — always visible so Race Analysis is accessible without fetching data */}
+      <ViewToggle view={view} setView={setView} />
+
+      {/* Race Analysis page — independent of allData */}
+      {view === "raceanalysis" && (
+        <RaceAnalysisView
+          cardIdInput={raCardIdInput}          setCardIdInput={setRaCardIdInput}
+          raceNumberInput={raRaceNumberInput}  setRaceNumberInput={setRaRaceNumberInput}
+          numbersInput={raNumbersInput}         setNumbersInput={setRaNumbersInput}
+          actualResultsInput={raActualResultsInput} setActualResultsInput={setRaActualResultsInput}
+          rows={raRows}                         setRows={setRaRows}
+          predRows={raPredRows}                 setPredRows={setRaPredRows}
+          actualRows={raActualRows}             setActualRows={setRaActualRows}
+          rawPlanetStates={raRawPlanetStates}   setRawPlanetStates={setRaRawPlanetStates}
+          loading={raLoading}                   setLoading={setRaLoading}
+          error={raError}                       setError={setRaError}
+          submittedMeta={raSubmittedMeta}       setSubmittedMeta={setRaSubmittedMeta}
+        />
+      )}
+
       {/* Error banner */}
-      {error && (
-        <div style={{ padding: "16px 32px 0" }}>
+      {error && view !== "raceanalysis" && (
+        <div style={{ padding: "0 32px 0" }}>
           <ErrorBanner message={error} />
         </div>
       )}
 
       {/* Loading state */}
-      {loading && (
+      {loading && view !== "raceanalysis" && (
         <div style={{ padding: "24px 32px" }}>
           <ChartSkeleton />
         </div>
       )}
 
-      {/* Main content — only shown when data is loaded */}
-      {!loading && allData && (
+      {/* Main content — only shown when data is loaded and not on race analysis */}
+      {!loading && allData && view !== "raceanalysis" && (
         <>
           <PlanetSummaryBar
             allData={allData}
             activePlanet={activePlanet}
             setActivePlanet={setActivePlanet}
           />
-
-          <ViewToggle view={view} setView={setView} />
 
           {view === "individual" ? (
             <IndividualView
@@ -90,7 +122,7 @@ export default function App() {
       )}
 
       {/* Empty state — before first fetch */}
-      {!loading && !allData && !error && (
+      {!loading && !allData && !error && view !== "raceanalysis" && (
         <div
           style={{
             display: "flex",
